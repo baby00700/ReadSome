@@ -100,6 +100,7 @@ class RandomActicle extends React.Component {
             defaultCurrent={1}
             total={count}
             onChange={this.pageChange}
+            showTotal={total => `共有 ${total} 篇`}
             showSizeChanger
             onShowSizeChange={this.onShowSizeChange}
           />
