@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Row, Col, Card } from 'antd';
-import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import { Row, Col, Card, PageHeader } from 'antd';
 
 @connect(({ randomacticle, loading }) => ({
   randomacticle,
@@ -9,33 +8,38 @@ import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 }))
 class ArticleDetail extends React.Component {
   componentDidMount() {
-    const { dispatch } = this.props;
+    window.sessionStorage.clear();
+    const { location, dispatch } = this.props;
     dispatch({
       type: 'randomacticle/patchArticleDetail',
+      payload: location.query.id,
     });
   }
 
   render() {
     const {
-      randomacticle: { article },
+      randomacticle: { articleDetail },
     } = this.props;
+    const { history } = this.props;
     return (
-      <PageHeaderWrapper
-        title={article.data === undefined ? '' : article.data.title}
-        content={article.data === undefined ? '' : article.data.author}
-      >
-        <Row>
-          <Col span={24}>
-            <Card>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: article.data === undefined ? '' : article.data.content,
-                }}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </PageHeaderWrapper>
+      <Row>
+        <PageHeader
+          onBack={() => {
+            history.go(-1);
+          }}
+          title={articleDetail.data === undefined ? '' : `${articleDetail.data.title}`}
+          subTitle={articleDetail.data === undefined ? '' : `${articleDetail.data.author}`}
+        />
+        <Col span={24}>
+          <Card bordered={false}>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: articleDetail.data === undefined ? '' : articleDetail.data.content,
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
     );
   }
 }

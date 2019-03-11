@@ -1,9 +1,8 @@
 import React from 'react';
 import { FormattedMessage } from 'umi/locale';
 import { connect } from 'dva';
-import { Card } from 'antd';
+import { Card, Pagination } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
-import router from 'umi/router';
 import style from './randomacticle.less';
 
 @connect(({ randomacticle, loading }) => ({
@@ -15,33 +14,63 @@ class RandomActicle extends React.Component {
     const { dispatch } = this.props;
     dispatch({
       type: 'randomacticle/fetchArticle',
+      payload: {
+        pageindex: 1,
+        pagesize: 8,
+      },
     });
   }
 
   goDetail = pk => {
-    router.push({
-      pathname: '/article/random-acticle/detail',
-      query: {
-        id: pk,
+    const { history } = this.props;
+    if (pk) {
+      history.push({ pathname: '/article/random-acticle/detail', query: { id: pk } });
+    }
+  };
+
+  pageChange = (page, pageSize) => {
+    console.log(page);
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'randomacticle/fetchArticle',
+      payload: {
+        pageindex: page,
+        pagesize: pageSize,
+      },
+    });
+  };
+
+  onShowSizeChange = (page, pageSize) => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'randomacticle/fetchArticle',
+      payload: {
+        pageindex: page,
+        pagesize: pageSize,
       },
     });
   };
 
   render() {
     const {
-      randomacticle: { article },
+      randomacticle: { articleList },
       loading,
     } = this.props;
-    console.log(article);
+    const count =
+      articleList !== undefined && typeof articleList.count === 'string'
+        ? parseInt(articleList.count, 10)
+        : 0;
     return (
       <PageHeaderWrapper
         title={<FormattedMessage id="app.article.title" />}
         content={<FormattedMessage id="app.article.description" />}
       >
-        <div>
-          {article === undefined || article === ''
-            ? ''
-            : article.map(t => {
+        <div className={style.listItem}>
+          {articleList &&
+          articleList !== undefined &&
+          articleList.data !== undefined &&
+          articleList !== ''
+            ? JSON.parse(articleList.data).map(t => {
                 const cons = JSON.parse(t.fields.con);
                 return (
                   <Card
@@ -60,8 +89,20 @@ class RandomActicle extends React.Component {
                     <p>{cons.data === undefined ? '' : cons.data.digest}...</p>
                   </Card>
                 );
-              })}
-          <div className={style.clear}>.</div>
+              })
+            : ''}
+
+          <div className={style.clear}> &nbsp; </div>
+        </div>
+        <div className={style.page}>
+          <Pagination
+            className={style.pageInder}
+            defaultCurrent={1}
+            total={count}
+            onChange={this.pageChange}
+            showSizeChanger
+            onShowSizeChange={this.onShowSizeChange}
+          />
         </div>
       </PageHeaderWrapper>
     );

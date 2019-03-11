@@ -4,7 +4,8 @@ export default {
   namespace: 'randomacticle',
 
   state: {
-    article: '',
+    articleList: {},
+    articleDetail: {},
   },
 
   effects: {
@@ -18,7 +19,7 @@ export default {
     *patchArticleDetail({ payload }, { call, put }) {
       const data = yield call(getArticleDetail, payload);
       yield put({
-        type: 'savearticle',
+        type: 'getArticleDetail',
         payload: data,
       });
     },
@@ -29,7 +30,13 @@ export default {
       console.log('payload=>', action.payload);
       return {
         ...state,
-        article: action.payload,
+        articleList: action.payload,
+      };
+    },
+    getArticleDetail(state, action) {
+      return {
+        ...state,
+        articleDetail: action.payload,
       };
     },
   },
