@@ -17,6 +17,8 @@ class NovelDetail extends React.Component {
     id: '',
     name: '',
     checked: true,
+    searched: false,
+    query: '',
   };
 
   componentDidMount() {
@@ -57,13 +59,57 @@ class NovelDetail extends React.Component {
     });
   };
 
+  searched = query => {
+    if (query) {
+      this.setState({
+        query,
+        searched: true,
+      });
+    } else {
+      this.setState({
+        query,
+        searched: false,
+      });
+    }
+  };
+
+  commonChapterListDocs = (bookId, t, index) => (
+    <div
+      key={t._id + JSON.stringify(index)}
+      onClick={() => {
+        console.log(t);
+        this.goCpContent(bookId, t._id, t.title, t.link);
+      }}
+    >
+      <p>{t.title}</p>
+      <Divider />
+    </div>
+  );
+
+  goCpContent = (bookId, id, title, link) => {
+    console.log('====>', bookId);
+    const { history } = this.props;
+    if (bookId) {
+      history.push({
+        pathname: '/article/novelHome/novelDetail/chapterContent',
+        query: {
+          bookId,
+          id: bookId,
+          title,
+          link,
+        },
+      });
+    }
+  };
+
   render() {
     const {
       novel: { summaryList, chapterList },
       location,
       history,
+      loading,
     } = this.props;
-    const { visible, id, name, checked } = this.state;
+    const { visible, id, name, checked, searched, query } = this.state;
     const isOk = summaryList && summaryList !== undefined && summaryList.length > 0;
     const isChapter =
       chapterList && chapterList._id !== undefined && chapterList.chapters.length > 0;
@@ -84,7 +130,7 @@ class NovelDetail extends React.Component {
         title: 'Action',
         key: 'action',
         render: (text, record) => (
-          <span>
+          <span key={record._id}>
             <Button
               onClick={() => {
                 this.goNovelChapter(record._id, record.name);
@@ -97,21 +143,27 @@ class NovelDetail extends React.Component {
       },
     ];
 
-    if (isOk) {
+    if (isOk && !loading) {
       summaryDocs = <Table columns={columns} dataSource={summaryList} />;
     } else {
       summaryDocs = <Empty />;
     }
 
-    if (isChapter) {
-      chapterDocs = chapterList.chapters.map((t, index) => {
-        return (
-          <div key={t.id + JSON.stringify(index)}>
-            <p>{t.title}</p>
-            <Divider />
-          </div>
-        );
-      });
+    let copyChapterList = JSON.parse(JSON.stringify(chapterList));
+    if (isChapter && !loading) {
+      const bookId = copyChapterList._id;
+      if (searched) {
+        let queryList = copyChapterList.chapters.filter(t => {
+          return t.title.indexOf(query) !== -1;
+        });
+        chapterDocs = queryList.map((t, index) => {
+          return this.commonChapterListDocs(bookId, t, index);
+        });
+      } else {
+        chapterDocs = chapterList.chapters.map((t, index) => {
+          return this.commonChapterListDocs(bookId, t, index);
+        });
+      }
     } else {
       chapterDocs = <Empty />;
     }
@@ -119,8 +171,8 @@ class NovelDetail extends React.Component {
     return (
       <PageHeaderWrapper>
         <Drawer
-          destroyOnClose
-          title={name + id}
+          // destroyOnClose
+          title={name}
           placement="right"
           closable
           width={400}
@@ -131,7 +183,7 @@ class NovelDetail extends React.Component {
             <Search
               placeholder="章节搜索"
               onSearch={value => {
-                console.log(value);
+                this.searched(value);
               }}
               style={{ width: 200 }}
             />

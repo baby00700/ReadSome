@@ -291,6 +291,12 @@ export default [
             hideInMenu: true,
             component: './Article/novelDetail',
           },
+          {
+            path: '/article/novelHome/novelDetail/chapterContent',
+            name: 'chapterContent',
+            hideInMenu: true,
+            component: './Article/chapterContent',
+          },
         ],
       },
       {

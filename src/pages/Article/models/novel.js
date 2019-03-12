@@ -1,4 +1,4 @@
-import { getRecommendPage, getSummary, getChapters } from '../services/api';
+import { getRecommendPage, getSummary, getChapters, getChapterContent } from '../services/api';
 
 export default {
   namespace: 'novel',
@@ -7,6 +7,7 @@ export default {
     bookList: {},
     summaryList: {},
     chapterList: {},
+    chapterContents: {},
   },
 
   effects: {
@@ -28,6 +29,13 @@ export default {
       const data = yield call(getChapters, payload);
       yield put({
         type: 'getChapterList',
+        payload: data,
+      });
+    },
+    *fetchChapterContent({ payload }, { call, put }) {
+      const data = yield call(getChapterContent, payload);
+      yield put({
+        type: 'getChapterContents',
         payload: data,
       });
     },
@@ -53,6 +61,13 @@ export default {
       return {
         ...state,
         chapterList: action.payload,
+      };
+    },
+    getChapterContents(state, action) {
+      console.log('payload=>', action.payload);
+      return {
+        ...state,
+        chapterContents: action.payload,
       };
     },
   },

@@ -132,7 +132,11 @@ class NovelHome extends React.Component {
         );
       });
     } else {
-      documents = <Skeleton active />;
+      documents = (
+        <Card>
+          <Skeleton active />
+        </Card>
+      );
       listData = [];
     }
 

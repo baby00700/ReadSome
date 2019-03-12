@@ -89,6 +89,11 @@ export default {
       target: 'http://api.zhuishushenqi.com',
       changeOrigin: true,
     },
+    // http://chapterup01.zhuishushenqi.com/chapter/http://vip.zhuishushenqi.com/chapter/56f8dd4c176d03ac19847d10?cv=1551247577885?t=1552296339
+    '/chapter/': {
+      target: 'http://chapterup01.zhuishushenqi.com',
+      changeOrigin: true,
+    },
   },
   ignoreMomentLocale: true,
   lessLoaderOptions: {

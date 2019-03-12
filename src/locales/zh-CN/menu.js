@@ -40,4 +40,7 @@ export default {
   'menu.article.articledetail': '文章详情',
   'menu.article.novelHome': '小说',
   'menu.article.novelDetail': '小说详细信息',
+  // chapterContent
+  'menu.article.novelDetail.chapterContent': '章节内容',
+  'menu.article.chapterContent': '章节内容',
 };
