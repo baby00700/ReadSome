@@ -19,7 +19,7 @@ export default [
 
     routes: [
       // dashboard
-      { path: '/', redirect: '/dashboard/analysis' },
+      { path: '/', redirect: '/article/random-acticle' },
       {
         path: '/dashboard',
         name: 'dashboard',
@@ -278,6 +278,18 @@ export default [
             name: 'articledetail',
             hideInMenu: true,
             component: './Article/articledetail',
+          },
+          {
+            path: '/article/novelHome',
+            name: 'novelHome',
+            hideInMenu: false,
+            component: './Article/novelHome',
+          },
+          {
+            path: '/article/novelHome/novelDetail',
+            name: 'novelDetail',
+            hideInMenu: true,
+            component: './Article/novelDetail',
           },
         ],
       },

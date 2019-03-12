@@ -38,4 +38,6 @@ export default {
   'menu.article': '文章',
   'menu.article.randomacticle': '随机一文',
   'menu.article.articledetail': '文章详情',
+  'menu.article.novelHome': '小说',
+  'menu.article.novelDetail': '小说详细信息',
 };

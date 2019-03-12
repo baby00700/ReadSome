@@ -81,6 +81,14 @@ export default {
       target: 'http://127.0.0.1:8888',
       changeOrigin: true,
     },
+    '/recommendPage/': {
+      target: 'https://api.zhuishushenqi.com',
+      changeOrigin: true,
+    },
+    '/toc/': {
+      target: 'http://api.zhuishushenqi.com',
+      changeOrigin: true,
+    },
   },
   ignoreMomentLocale: true,
   lessLoaderOptions: {
