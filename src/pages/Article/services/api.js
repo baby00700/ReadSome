@@ -26,3 +26,7 @@ export async function getChapterContent(params) {
   const time = Math.round(new Date().getTime() / 1000) + 7200;
   return request(`/chapter/${urlencode(params)}?t=${time}`);
 }
+
+export async function getNovelSearch(params) {
+  return request(`/book/fuzzy-search?query=${params}&start=0&limit=100`);
+}

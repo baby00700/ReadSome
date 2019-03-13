@@ -1,4 +1,10 @@
-import { getRecommendPage, getSummary, getChapters, getChapterContent } from '../services/api';
+import {
+  getRecommendPage,
+  getSummary,
+  getChapters,
+  getChapterContent,
+  getNovelSearch,
+} from '../services/api';
 
 export default {
   namespace: 'novel',
@@ -36,6 +42,13 @@ export default {
       const data = yield call(getChapterContent, payload);
       yield put({
         type: 'getChapterContents',
+        payload: data,
+      });
+    },
+    *fetchNovelSearch({ payload }, { call, put }) {
+      const data = yield call(getNovelSearch, payload);
+      yield put({
+        type: 'getRecommends',
         payload: data,
       });
     },

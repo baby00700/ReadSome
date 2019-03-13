@@ -94,6 +94,11 @@ export default {
       target: 'http://chapterup01.zhuishushenqi.com',
       changeOrigin: true,
     },
+    // http://api.zhuishushenqi.com/book/fuzzy-search?query=天&start=0&limit=100/
+    '/book/': {
+      target: 'http://api.zhuishushenqi.com',
+      changeOrigin: true,
+    },
   },
   ignoreMomentLocale: true,
   lessLoaderOptions: {

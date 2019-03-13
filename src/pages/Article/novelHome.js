@@ -1,11 +1,25 @@
 import React from 'react';
 // import { FormattedMessage } from 'umi/locale';
 import { connect } from 'dva';
-import { Card, Tooltip, Icon, Skeleton, message, Drawer, Button, List, Avatar } from 'antd';
+import {
+  Card,
+  Tooltip,
+  Icon,
+  Skeleton,
+  message,
+  Drawer,
+  Button,
+  List,
+  Avatar,
+  Modal,
+  Input,
+} from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import style from './novel.less';
 
+const urlencode = require('urlencode');
 const { Meta } = Card;
+const { Search } = Input;
 
 @connect(({ novel, loading }) => ({
   novel,
@@ -15,6 +29,8 @@ class NovelHome extends React.Component {
   state = {
     likedIdList: [],
     visible: false,
+    visibleModel: false,
+    imgErr: false,
   };
 
   componentDidMount() {
@@ -42,11 +58,29 @@ class NovelHome extends React.Component {
           id,
           bookCover: bookInfo.cover,
           bookName: bookInfo.title,
-          bookLongIntro: bookInfo.longIntro,
+          bookLongIntro: bookInfo.shortIntro,
           auther: bookInfo.author,
         },
       });
     }
+  };
+
+  showModal = () => {
+    this.setState({
+      visibleModel: true,
+    });
+  };
+
+  handleOk = e => {
+    this.setState({
+      visibleModel: false,
+    });
+  };
+
+  handleCancel = e => {
+    this.setState({
+      visibleModel: false,
+    });
   };
 
   handleLike = (id, e) => {
@@ -80,22 +114,49 @@ class NovelHome extends React.Component {
     });
   };
 
+  novelSearch = query => {
+    const { dispatch } = this.props;
+    if (query) {
+      dispatch({
+        type: 'novel/fetchNovelSearch',
+        payload: query,
+      });
+    } else {
+      dispatch({
+        type: 'novel/fetchNovelHome',
+      });
+    }
+  };
+
+  handleImgErr = () => {
+    this.setState({
+      imgErr: true,
+    });
+  };
+
   render() {
     const {
       novel: { bookList },
       loading,
     } = this.props;
-    const { likedIdList, visible } = this.state;
+    const { likedIdList, visible, imgErr } = this.state;
     const isOk = bookList && bookList !== undefined && bookList.ok;
     let documents = null;
     let listData = [];
     if (isOk) {
-      const recommendList = bookList.data;
+      const recommendList = bookList.data !== undefined ? bookList.data : bookList.books;
       listData = recommendList.filter(t => {
+        if (t.book === undefined) {
+          t.book = t;
+        }
+        const id = t.book !== undefined ? t.book._id : t._id;
         return likedIdList.indexOf(t.book._id) !== -1;
       });
       documents = recommendList.map(t => {
-        const id = t.book._id;
+        if (t.book === undefined) {
+          t.book = t;
+        }
+        const id = t.book !== undefined ? t.book._id : t._id;
         return (
           <Card
             hoverable
@@ -108,13 +169,20 @@ class NovelHome extends React.Component {
             className={style.novelList}
             cover={
               <img
-                alt="example"
-                src={`http://statics.zhuishushenqi.com/agent/${t.book.cover}`}
+                alt={t.book.title}
+                src={
+                  !imgErr
+                    ? `http://statics.zhuishushenqi.com/agent/${urlencode(t.book.cover)}`
+                    : `http://statics.zhuishushenqi.com/agent/${urlencode(
+                        t.book.cover.split('agent/')[1]
+                      )}`
+                }
                 style={{ height: 280 }}
+                onError={this.handleImgErr}
               />
             }
             actions={[
-              <Tooltip placement="bottom" title={t.book.longIntro}>
+              <Tooltip placement="bottom" title={t.book.shortIntro}>
                 <Icon type="eye" />
               </Tooltip>,
               <Icon
@@ -149,6 +217,34 @@ class NovelHome extends React.Component {
         >
           我的收藏
         </Button>
+        <Button
+          style={{
+            position: 'fixed',
+            top: 190,
+            right: -3,
+            zIndex: 1000,
+            height: 40,
+            textAlign: 'center',
+          }}
+          type="primary"
+          onClick={this.showModal}
+        >
+          搜索小说
+        </Button>
+        <Modal
+          title="输入小说名"
+          visible={this.state.visibleModel}
+          onCancel={this.handleCancel}
+          footer={null}
+        >
+          <Search
+            placeholder="小说名"
+            onSearch={value => {
+              this.novelSearch(value);
+            }}
+            style={{ width: 200 }}
+          />
+        </Modal>
         <Drawer
           title="收藏的小说"
           placement="right"
@@ -160,30 +256,41 @@ class NovelHome extends React.Component {
           <List
             itemLayout="vertical"
             dataSource={listData}
-            renderItem={item => (
-              <List.Item>
-                <List.Item.Meta
-                  onClick={() => {
-                    this.goDetail(item.book._id, item.book);
-                  }}
-                  avatar={
-                    <Avatar
-                      shape="square"
-                      src={`http://statics.zhuishushenqi.com/agent/${item.book.cover}`}
-                    />
-                  }
-                  title={item.book.title}
-                  description={item.book.shortIntro}
-                />
-                <Button
-                  onClick={e => {
-                    this.handleLike(item.book._id, e);
-                  }}
-                >
-                  取消收藏
-                </Button>
-              </List.Item>
-            )}
+            renderItem={item => {
+              if (item.book === undefined) {
+                item.book = item;
+              }
+              return (
+                <List.Item>
+                  <List.Item.Meta
+                    onClick={() => {
+                      this.goDetail(item.book._id, item.book);
+                    }}
+                    avatar={
+                      <Avatar
+                        shape="square"
+                        src={
+                          !imgErr
+                            ? `http://statics.zhuishushenqi.com/agent/${urlencode(item.book.cover)}`
+                            : `http://statics.zhuishushenqi.com/agent/${urlencode(
+                                item.book.cover.split('agent/')[1]
+                              )}`
+                        }
+                      />
+                    }
+                    title={item.book.title}
+                    description={item.book.shortIntro}
+                  />
+                  <Button
+                    onClick={e => {
+                      this.handleLike(item.book._id, e);
+                    }}
+                  >
+                    取消收藏
+                  </Button>
+                </List.Item>
+              );
+            }}
           />
         </Drawer>
         {documents}

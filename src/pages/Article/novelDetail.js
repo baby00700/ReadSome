@@ -6,6 +6,7 @@ import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import style from './novel.less';
 
 const Search = Input.Search;
+const urlencode = require('urlencode');
 
 @connect(({ novel, loading }) => ({
   novel,
@@ -19,6 +20,7 @@ class NovelDetail extends React.Component {
     checked: true,
     searched: false,
     query: '',
+    imgErr: false,
   };
 
   componentDidMount() {
@@ -102,6 +104,12 @@ class NovelDetail extends React.Component {
     }
   };
 
+  handleImgErr = () => {
+    this.setState({
+      imgErr: true,
+    });
+  };
+
   render() {
     const {
       novel: { summaryList, chapterList },
@@ -109,7 +117,7 @@ class NovelDetail extends React.Component {
       history,
       loading,
     } = this.props;
-    const { visible, id, name, checked, searched, query } = this.state;
+    const { visible, id, name, checked, searched, query, imgErr } = this.state;
     const isOk = summaryList && summaryList !== undefined && summaryList.length > 0;
     const isChapter =
       chapterList && chapterList._id !== undefined && chapterList.chapters.length > 0;
@@ -168,6 +176,17 @@ class NovelDetail extends React.Component {
       chapterDocs = <Empty />;
     }
 
+    let docs = chapterDocs;
+    if (!checked) {
+      if (chapterDocs.constructor === Array) {
+        docs = chapterDocs.reverse();
+      } else {
+        docs = '';
+      }
+    } else {
+      docs = chapterDocs;
+    }
+
     return (
       <PageHeaderWrapper>
         <Drawer
@@ -198,7 +217,7 @@ class NovelDetail extends React.Component {
             </span>
           </div>
 
-          {checked ? chapterDocs : chapterDocs.reverse()}
+          {docs}
         </Drawer>
         <PageHeader
           onBack={() => {
@@ -211,8 +230,15 @@ class NovelDetail extends React.Component {
             <img
               className={style.bookImage}
               style={{ float: 'left' }}
-              src={`http://statics.zhuishushenqi.com/agent/${location.query.bookCover}`}
-              alt=""
+              src={
+                !imgErr
+                  ? `http://statics.zhuishushenqi.com/agent/${urlencode(location.query.bookCover)}`
+                  : `http://statics.zhuishushenqi.com/agent/${urlencode(
+                      location.query.bookCover.split('agent/')[1]
+                    )}`
+              }
+              // src={`http://statics.zhuishushenqi.com/agent/${location.query.bookCover}`}
+              onError={this.handleImgErr}
             />
           </div>
 
