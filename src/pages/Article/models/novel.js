@@ -4,6 +4,7 @@ import {
   getChapters,
   getChapterContent,
   getNovelSearch,
+  getNovelInfo,
 } from '../services/api';
 
 export default {
@@ -14,6 +15,9 @@ export default {
     summaryList: {},
     chapterList: {},
     chapterContents: {},
+    novelInfoList: [],
+    novelSetttingsVisible: false,
+    novelSetttings: {},
   },
 
   effects: {
@@ -52,6 +56,28 @@ export default {
         payload: data,
       });
     },
+    *fetchNovelInfo({ payload }, { call, put }) {
+      const data = yield payload.map((item, i) => {
+        return call(getNovelInfo, payload[i]);
+      });
+      yield put({
+        type: 'getNovelInfo',
+        payload: data,
+      });
+    },
+    *toggleNovelSettingVisible({ payload }, { call, put }) {
+      yield put({
+        type: 'setNovelSettingModelVisible',
+        payload: payload,
+      });
+    },
+    *postSettings({ payload }, { call, put }) {
+      yield put({
+        type: 'setSettings',
+        payload: payload,
+      });
+      window.localStorage.setItem('novelSetttings', JSON.stringify(payload));
+    },
   },
 
   reducers: {
@@ -81,6 +107,25 @@ export default {
       return {
         ...state,
         chapterContents: action.payload,
+      };
+    },
+    getNovelInfo(state, action) {
+      console.log('payload=>', action.payload);
+      return {
+        ...state,
+        novelInfoList: action.payload,
+      };
+    },
+    setNovelSettingModelVisible(state, { payload }) {
+      return {
+        ...state,
+        novelSetttingsVisible: payload,
+      };
+    },
+    setSettings(state, { payload }) {
+      return {
+        ...state,
+        novelSetttings: payload,
       };
     },
   },

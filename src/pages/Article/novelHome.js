@@ -15,6 +15,7 @@ import {
   Input,
 } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import NovelSettings from './novelSettings';
 import style from './novel.less';
 
 const urlencode = require('urlencode');
@@ -34,20 +35,45 @@ class NovelHome extends React.Component {
   };
 
   componentDidMount() {
+    const { dispatch } = this.props;
     let likedIdList = [];
+
     if (!('likedId' in localStorage)) {
       window.localStorage.setItem('likedId', JSON.stringify([]));
     } else {
       likedIdList = JSON.parse(localStorage.getItem('likedId'));
     }
+
+    let novelSetttings = {};
+    if (!('novelSetttings' in localStorage)) {
+      window.localStorage.setItem('novelSetttings', JSON.stringify({}));
+    } else {
+      novelSetttings = JSON.parse(localStorage.getItem('novelSetttings'));
+    }
+    console.log('1', novelSetttings);
+    dispatch({
+      type: 'novel/postSettings',
+      payload: novelSetttings,
+    });
     this.setState({
       likedIdList,
     });
-    const { dispatch } = this.props;
+
     dispatch({
       type: 'novel/fetchNovelHome',
     });
+    this.getNovalInfo();
+    console.log('-==-');
   }
+
+  getNovalInfo = () => {
+    const { dispatch } = this.props;
+    const localDatas = JSON.parse(localStorage.getItem('likedId'));
+    dispatch({
+      type: 'novel/fetchNovelInfo',
+      payload: localDatas.filter(t => t !== null),
+    });
+  };
 
   goDetail = (id, bookInfo) => {
     const { history } = this.props;
@@ -99,6 +125,7 @@ class NovelHome extends React.Component {
     this.setState({
       likedIdList,
     });
+    this.getNovalInfo();
     e.stopPropagation();
   };
 
@@ -134,9 +161,17 @@ class NovelHome extends React.Component {
     });
   };
 
+  toggleSettingModelVisible = visible => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'novel/toggleNovelSettingVisible',
+      payload: visible,
+    });
+  };
+
   render() {
     const {
-      novel: { bookList },
+      novel: { bookList, novelInfoList, novelSetttingsVisible, novelSetttings },
       loading,
     } = this.props;
     const { likedIdList, visible, imgErr } = this.state;
@@ -145,13 +180,7 @@ class NovelHome extends React.Component {
     let listData = [];
     if (isOk) {
       const recommendList = bookList.data !== undefined ? bookList.data : bookList.books;
-      listData = recommendList.filter(t => {
-        if (t.book === undefined) {
-          t.book = t;
-        }
-        const id = t.book !== undefined ? t.book._id : t._id;
-        return likedIdList.indexOf(t.book._id) !== -1;
-      });
+      listData = novelInfoList;
       documents = recommendList.map(t => {
         if (t.book === undefined) {
           t.book = t;
@@ -168,18 +197,22 @@ class NovelHome extends React.Component {
             }}
             className={style.novelList}
             cover={
-              <img
-                alt={t.book.title}
-                src={
-                  !imgErr
-                    ? `http://statics.zhuishushenqi.com/agent/${urlencode(t.book.cover)}`
-                    : `http://statics.zhuishushenqi.com/agent/${urlencode(
-                        t.book.cover.split('agent/')[1]
-                      )}`
-                }
-                style={{ height: 280 }}
-                onError={this.handleImgErr}
-              />
+              novelSetttings.canImage ? (
+                <img
+                  alt={t.book.title}
+                  src={
+                    !imgErr
+                      ? `http://statics.zhuishushenqi.com/agent/${urlencode(t.book.cover)}`
+                      : `http://statics.zhuishushenqi.com/agent/${urlencode(
+                          t.book.cover.split('agent/')[1]
+                        )}`
+                  }
+                  style={{ height: 280 }}
+                  onError={this.handleImgErr}
+                />
+              ) : (
+                ''
+              )
             }
             actions={[
               <Tooltip placement="bottom" title={t.book.shortIntro}>
@@ -207,7 +240,6 @@ class NovelHome extends React.Component {
       );
       listData = [];
     }
-
     return (
       <PageHeaderWrapper>
         <Button
@@ -231,6 +263,27 @@ class NovelHome extends React.Component {
         >
           搜索小说
         </Button>
+        <Button
+          style={{
+            position: 'fixed',
+            top: 240,
+            right: -3,
+            zIndex: 1000,
+            height: 40,
+            textAlign: 'center',
+          }}
+          type="primary"
+          onClick={() => {
+            this.toggleSettingModelVisible(true);
+          }}
+        >
+          本地设置
+        </Button>
+        <NovelSettings
+          modelVisible={novelSetttingsVisible}
+          handleHide={this.hideSetting}
+          handleOks={this.handleSettingOk}
+        />
         <Modal
           title="输入小说名"
           visible={this.state.visibleModel}
@@ -249,7 +302,7 @@ class NovelHome extends React.Component {
           title="收藏的小说"
           placement="right"
           closable
-          width={400}
+          width={350}
           onClose={this.onClose}
           visible={visible}
         >
@@ -267,19 +320,27 @@ class NovelHome extends React.Component {
                       this.goDetail(item.book._id, item.book);
                     }}
                     avatar={
-                      <Avatar
-                        shape="square"
-                        src={
-                          !imgErr
-                            ? `http://statics.zhuishushenqi.com/agent/${urlencode(item.book.cover)}`
-                            : `http://statics.zhuishushenqi.com/agent/${urlencode(
-                                item.book.cover.split('agent/')[1]
-                              )}`
-                        }
-                      />
+                      !novelSetttings.canImage ? (
+                        <img
+                          alt={item.book.title}
+                          style={{ width: 50 }}
+                          src={
+                            !imgErr
+                              ? `http://statics.zhuishushenqi.com/agent/${urlencode(
+                                  item.book.cover
+                                )}`
+                              : `http://statics.zhuishushenqi.com/agent/${urlencode(
+                                  item.book.cover.split('agent/')[1]
+                                )}`
+                          }
+                          onError={this.handleImgErr}
+                        />
+                      ) : (
+                        ''
+                      )
                     }
                     title={item.book.title}
-                    description={item.book.shortIntro}
+                    description={item.book.longIntro}
                   />
                   <Button
                     onClick={e => {

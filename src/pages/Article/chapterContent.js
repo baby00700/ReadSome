@@ -13,6 +13,7 @@ import {
   Divider,
   Button,
 } from 'antd';
+import NovelSettings from './novelSettings';
 // import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 // import style from './novel.less';
 
@@ -39,6 +40,16 @@ class ChapterContent extends React.Component {
     dispatch({
       type: 'novel/fetchChapters',
       payload: location.query.bookId,
+    });
+    let novelSetttings = {};
+    if (!('novelSetttings' in localStorage)) {
+      window.localStorage.setItem('novelSetttings', JSON.stringify({}));
+    } else {
+      novelSetttings = JSON.parse(localStorage.getItem('novelSetttings'));
+    }
+    dispatch({
+      type: 'novel/postSettings',
+      payload: novelSetttings,
     });
   }
 
@@ -104,9 +115,17 @@ class ChapterContent extends React.Component {
     return list.join('');
   };
 
+  toggleSettingModelVisible = visible => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'novel/toggleNovelSettingVisible',
+      payload: visible,
+    });
+  };
+
   render() {
     const {
-      novel: { chapterContents, chapterList },
+      novel: { chapterContents, chapterList, novelSetttings, novelSetttingsVisible },
       loading,
       history,
       location,
@@ -117,6 +136,11 @@ class ChapterContent extends React.Component {
     if (ok) {
       contentDocs = (
         <p
+          style={{
+            fontSize: novelSetttings.fontSize,
+            color: novelSetttings.darkModel ? '#666' : '#000',
+            backgroundColor: novelSetttings.darkModel ? '#000' : '#fff',
+          }}
           dangerouslySetInnerHTML={{
             __html:
               !loading && chapterContents.chapter !== undefined
@@ -173,6 +197,23 @@ class ChapterContent extends React.Component {
         >
           全部章节
         </Button>
+        <Button
+          style={{
+            position: 'fixed',
+            top: 240,
+            right: -3,
+            zIndex: 1000,
+            height: 40,
+            textAlign: 'center',
+          }}
+          type="primary"
+          onClick={() => {
+            this.toggleSettingModelVisible(true);
+          }}
+        >
+          本地设置
+        </Button>
+        <NovelSettings modelVisible={novelSetttingsVisible} />
         <Drawer
           // destroyOnClose
           placement="right"

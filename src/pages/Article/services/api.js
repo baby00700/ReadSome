@@ -30,3 +30,7 @@ export async function getChapterContent(params) {
 export async function getNovelSearch(params) {
   return request(`/book/fuzzy-search?query=${params}&start=0&limit=100`);
 }
+
+export async function getNovelInfo(params) {
+  return request(`/book/${params}`);
+}
