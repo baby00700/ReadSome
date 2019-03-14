@@ -200,7 +200,7 @@ class ChapterContent extends React.Component {
         <Button
           style={{
             position: 'fixed',
-            top: 240,
+            top: 190,
             right: -3,
             zIndex: 1000,
             height: 40,

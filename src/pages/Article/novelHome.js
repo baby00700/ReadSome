@@ -218,6 +218,20 @@ class NovelHome extends React.Component {
               <Tooltip placement="bottom" title={t.book.shortIntro}>
                 <Icon type="eye" />
               </Tooltip>,
+              <Tooltip
+                placement="bottom"
+                title={
+                  `总字数: ` +
+                  t.book.wordCount +
+                  `字; 读者留存率: ` +
+                  t.book.retentionRatio +
+                  `%;  追书人气: ` +
+                  t.book.latelyFollower
+                }
+              >
+                <Icon type="pie-chart" />
+              </Tooltip>,
+
               <Icon
                 style={{ color: likedIdList.indexOf(t.book._id) === -1 ? '#999' : 'red' }}
                 type="heart"
@@ -320,7 +334,7 @@ class NovelHome extends React.Component {
                       this.goDetail(item.book._id, item.book);
                     }}
                     avatar={
-                      !novelSetttings.canImage ? (
+                      novelSetttings.canImage ? (
                         <img
                           alt={item.book.title}
                           style={{ width: 50 }}
