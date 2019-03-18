@@ -110,6 +110,17 @@ class NovelDetail extends React.Component {
     });
   };
 
+  imageInit = () => {
+    const { location } = this.props;
+    const { imgErr } = this.state;
+    const imgs = !imgErr
+      ? `http://statics.zhuishushenqi.com/agent/${urlencode(location.query.bookCover)}`
+      : `http://statics.zhuishushenqi.com/agent/${urlencode(
+          location.query.bookCover.split('agent/')[1]
+        )}`;
+    return imgs;
+  };
+
   render() {
     const {
       novel: { summaryList, chapterList },
@@ -150,13 +161,11 @@ class NovelDetail extends React.Component {
         ),
       },
     ];
-
     if (isOk && !loading) {
       summaryDocs = <Table columns={columns} dataSource={summaryList} />;
     } else {
       summaryDocs = <Empty />;
     }
-
     let copyChapterList = JSON.parse(JSON.stringify(chapterList));
     if (isChapter && !loading) {
       const bookId = copyChapterList._id;
@@ -186,6 +195,14 @@ class NovelDetail extends React.Component {
     } else {
       docs = chapterDocs;
     }
+    const stylesInlineFt = {
+      position: 'absolute',
+      width: '200',
+      height: 300,
+      top: 50,
+      backgrondColor: 'rgba(0,255,0,0)',
+      zIndex: 2,
+    };
 
     return (
       <PageHeaderWrapper>
@@ -220,13 +237,18 @@ class NovelDetail extends React.Component {
           {docs}
         </Drawer>
         <PageHeader
+          style={{ background: 'rgba(0,0,0,0)' }}
           onBack={() => {
             history.go(-1);
           }}
           title="小说详情"
         />
-        <Card bordered={false}>
-          <div className={style.left}>
+        <Card
+          hoverable
+          bordered={false}
+          style={{ borderRadius: '10', height: 400, overflow: 'hidden' }}
+        >
+          <div style={stylesInlineFt}>
             <img
               className={style.bookImage}
               style={{ float: 'left' }}
@@ -241,11 +263,45 @@ class NovelDetail extends React.Component {
               onError={this.handleImgErr}
             />
           </div>
-
-          <div className={style.right} style={{ float: 'left' }}>
+          <div
+            style={{
+              width: 'calc(100% - 400px)',
+              height: ' 300px',
+              overflow: 'hidden',
+              //background-color:red,
+              textShadow: '1px 2x 2px #fff',
+              position: 'absolute',
+              left: 260,
+              top: 50,
+              zIndex: 2,
+            }}
+          >
             <p className={style.bookName}>{location.query.bookName}</p>
             <p className={style.bookIntro}>{location.query.bookLongIntro}</p>
           </div>
+          <img
+            // className={style.bookImage}
+            style={{
+              width: '100%',
+              height: 400,
+              filter: 'blur(40px)',
+              position: 'absolute',
+              top: '0',
+              left: '0',
+              zIndex: '1',
+              display: 'block',
+            }}
+            src={
+              !imgErr
+                ? `http://statics.zhuishushenqi.com/agent/${urlencode(location.query.bookCover)}`
+                : `http://statics.zhuishushenqi.com/agent/${urlencode(
+                    location.query.bookCover.split('agent/')[1]
+                  )}`
+            }
+            // src={`http://statics.zhuishushenqi.com/agent/${location.query.bookCover}`}
+            onError={this.handleImgErr}
+          />
+          <div className={style.clear}>.</div>
         </Card>
         <Card style={{ marginTop: 20 }}>{summaryDocs}</Card>
       </PageHeaderWrapper>
