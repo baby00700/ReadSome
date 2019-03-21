@@ -301,6 +301,19 @@ export default [
         ],
       },
       {
+        path: '/pagegenerator',
+        // icon: 'file-word',
+        name: 'pageGenerator',
+        routes: [
+          {
+            path: '/pageGenerator/pageGeneratorIndex',
+            name: 'pageGeneratorIndex',
+            hideInMenu: false,
+            component: './PageGenerator/pageGeneratorIndex',
+          },
+        ],
+      },
+      {
         component: '404',
       },
     ],

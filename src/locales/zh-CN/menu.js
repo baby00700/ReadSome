@@ -43,4 +43,7 @@ export default {
   // chapterContent
   'menu.article.novelDetail.chapterContent': '章节内容',
   'menu.article.chapterContent': '章节内容',
+  // pageGenerator
+  'menu.pageGenerator': '页面生成器',
+  'menu.pageGenerator.pageGeneratorIndex': '页面生成',
 };
